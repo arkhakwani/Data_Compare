@@ -29,9 +29,11 @@ def load_file(file):
     
     try:
         if file.name.endswith('.csv'):
-            return pd.read_csv(file)
+            # Using python engine for better compatibility with pandas 2.1.3
+            return pd.read_csv(file, engine='python')
         elif file.name.endswith(('.xlsx', '.xls')):
-            return pd.read_excel(file)
+            # Using openpyxl engine for Excel files
+            return pd.read_excel(file, engine='openpyxl')
         else:
             st.error("Unsupported file format. Please upload CSV or Excel files.")
             return None
@@ -50,8 +52,9 @@ def compare_dataframes(df1, df2):
     differences = {}
     for col in common_cols:
         # Get unique values in each dataframe
-        values1 = set(df1[col].dropna().unique())
-        values2 = set(df2[col].dropna().unique())
+        # Using astype(str) for better compatibility with numpy 1.26.4
+        values1 = set(df1[col].dropna().astype(str).unique())
+        values2 = set(df2[col].dropna().astype(str).unique())
         
         # Find values that are in one set but not in the other
         only_in_1 = values1 - values2
