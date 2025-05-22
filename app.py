@@ -1,22 +1,17 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from io import BytesIO
 
-# Set page config with optimized settings
+# Set page config
 st.set_page_config(
     page_title="File Comparison Tool",
     page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
-# Simplified CSS for better performance
+# Simplified CSS
 st.markdown("""
     <style>
-    .main {
-        background-color: #f5f7f9;
-    }
     .stButton>button {
         background-color: #4CAF50;
         color: white;
@@ -32,13 +27,11 @@ def load_file(file):
     if file is None:
         return None
     
-    file_extension = file.name.split('.')[-1].lower()
-    
     try:
-        if file_extension == 'csv':
-            return pd.read_csv(file, engine='python')
-        elif file_extension in ['xlsx', 'xls']:
-            return pd.read_excel(file, engine='openpyxl')
+        if file.name.endswith('.csv'):
+            return pd.read_csv(file)
+        elif file.name.endswith(('.xlsx', '.xls')):
+            return pd.read_excel(file)
         else:
             st.error("Unsupported file format. Please upload CSV or Excel files.")
             return None
