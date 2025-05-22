@@ -29,7 +29,7 @@ def load_file(file):
     
     try:
         if file.name.endswith('.csv'):
-            # Using python engine for better compatibility with pandas 2.1.3
+            # Using python engine for better compatibility with pandas 2.2.2
             return pd.read_csv(file, engine='python')
         elif file.name.endswith(('.xlsx', '.xls')):
             # Using openpyxl engine for Excel files
@@ -124,7 +124,7 @@ def main():
                                     st.write("No unique values")
                 
                 with tab2:
-                    # Create summary visualization
+                    # Create summary visualization using plotly 5.21.0
                     summary_data = []
                     for col, diff in differences.items():
                         summary_data.append({
@@ -139,7 +139,8 @@ def main():
                                    x='Column',
                                    y=['Unique in File 1', 'Unique in File 2'],
                                    title='Summary of Differences',
-                                   barmode='group')
+                                   barmode='group',
+                                   template='plotly_white')  # Using a modern template
                         st.plotly_chart(fig, use_container_width=True)
             else:
                 st.success("No differences found between the files!")
