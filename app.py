@@ -176,18 +176,18 @@ def main():
         
         with col1:
             st.markdown("### First Database")
-            db_type1 = st.selectbox("Select database type", ["sqlite", "mysql", "postgresql"])
+            db_type1 = st.selectbox("Select database type", ["sqlite", "mysql", "postgresql"], key="db_type_1")
             if db_type1 == "sqlite":
-                db_path1 = st.text_input("Database path")
-                query1 = st.text_area("SQL Query")
+                db_path1 = st.text_input("Database path", key="db_path_1")
+                query1 = st.text_area("SQL Query", key="query_1")
                 if db_path1 and query1:
                     df1 = load_from_sql("sqlite", {"database": db_path1, "query": query1})
             else:
-                host1 = st.text_input("Host")
-                user1 = st.text_input("Username")
-                password1 = st.text_input("Password", type="password")
-                database1 = st.text_input("Database name")
-                query1 = st.text_area("SQL Query")
+                host1 = st.text_input("Host", key="host_1")
+                user1 = st.text_input("Username", key="user_1")
+                password1 = st.text_input("Password", type="password", key="password_1")
+                database1 = st.text_input("Database name", key="database_1")
+                query1 = st.text_area("SQL Query", key="query_1_alt")
                 if all([host1, user1, password1, database1, query1]):
                     df1 = load_from_sql(db_type1, {
                         "host": host1,
@@ -199,18 +199,18 @@ def main():
         
         with col2:
             st.markdown("### Second Database")
-            db_type2 = st.selectbox("Select database type", ["sqlite", "mysql", "postgresql"])
+            db_type2 = st.selectbox("Select database type", ["sqlite", "mysql", "postgresql"], key="db_type_2")
             if db_type2 == "sqlite":
-                db_path2 = st.text_input("Database path")
-                query2 = st.text_area("SQL Query")
+                db_path2 = st.text_input("Database path", key="db_path_2")
+                query2 = st.text_area("SQL Query", key="query_2")
                 if db_path2 and query2:
                     df2 = load_from_sql("sqlite", {"database": db_path2, "query": query2})
             else:
-                host2 = st.text_input("Host")
-                user2 = st.text_input("Username")
-                password2 = st.text_input("Password", type="password")
-                database2 = st.text_input("Database name")
-                query2 = st.text_area("SQL Query")
+                host2 = st.text_input("Host", key="host_2")
+                user2 = st.text_input("Username", key="user_2")
+                password2 = st.text_input("Password", type="password", key="password_2")
+                database2 = st.text_input("Database name", key="database_2")
+                query2 = st.text_area("SQL Query", key="query_2_alt")
                 if all([host2, user2, password2, database2, query2]):
                     df2 = load_from_sql(db_type2, {
                         "host": host2,
