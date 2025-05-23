@@ -259,7 +259,7 @@ def load_image_file(file):
         return None
 
 def compare_images(img1_data, img2_data):
-    """Compare two images and return differences"""
+    """Compare two images and return differences using PIL instead of OpenCV"""
     if not img1_data or not img2_data:
         return None
     
@@ -270,51 +270,42 @@ def compare_images(img1_data, img2_data):
     if img1.size != img2.size:
         img2 = img2.resize(img1.size)
     
-    # Convert to numpy arrays for OpenCV
-    img1_np = np.array(img1)
-    img2_np = np.array(img2)
+    # Calculate difference image
+    diff = ImageChops.difference(img1, img2)
     
-    # Convert to grayscale for structural similarity
-    gray1 = cv2.cvtColor(img1_np, cv2.COLOR_RGB2GRAY)
-    gray2 = cv2.cvtColor(img2_np, cv2.COLOR_RGB2GRAY)
+    # Convert difference to grayscale
+    diff_gray = diff.convert('L')
     
-    # Calculate structural similarity
-    score, diff = ssim(gray1, gray2, full=True)
+    # Calculate statistics
+    stat = ImageStat.Stat(diff_gray)
+    mean_diff = stat.mean[0]
+    max_diff = stat.extrema[0][1]
     
-    # Create difference image
-    diff = (diff * 255).astype("uint8")
-    thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+    # Create visualization of differences
+    diff_vis = img1.copy()
+    diff_pixels = diff_gray.point(lambda x: 255 if x > 30 else 0)
+    diff_vis.paste((0, 255, 0), mask=diff_pixels)
     
-    # Find contours of differences
-    contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
-    
-    # Create visualization
-    img1_with_boxes = img1_np.copy()
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(img1_with_boxes, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    # Calculate similarity score (0-1)
+    similarity_score = 1 - (mean_diff / 255)
     
     # Calculate color histograms
-    hist1 = cv2.calcHist([img1_np], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256])
-    hist2 = cv2.calcHist([img2_np], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256])
-    
-    # Normalize histograms
-    cv2.normalize(hist1, hist1, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-    cv2.normalize(hist2, hist2, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    hist1 = img1.histogram()
+    hist2 = img2.histogram()
     
     # Calculate histogram similarity
-    hist_similarity = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+    hist_similarity = sum(min(h1, h2) for h1, h2 in zip(hist1, hist2)) / sum(hist1)
     
     return {
-        'similarity_score': score,
+        'similarity_score': similarity_score,
         'histogram_similarity': hist_similarity,
-        'difference_image': Image.fromarray(img1_with_boxes),
+        'difference_image': diff_vis,
         'metadata_diff': {
             'format': img1_data['metadata']['format'] != img2_data['metadata']['format'],
             'size': img1_data['metadata']['size'] != img2_data['metadata']['size'],
             'mode': img1_data['metadata']['mode'] != img2_data['metadata']['mode']
         },
-        'num_differences': len(contours)
+        'num_differences': int(mean_diff * img1.size[0] * img1.size[1] / 255)
     }
 
 def main():
